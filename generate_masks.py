@@ -200,7 +200,7 @@ def main():
     print("="*60)
     
     # Configurações
-    NUM_SAMPLES = 100
+    NUM_SAMPLES = 1
     OUTPUT_DIR = './generated_masks'
     CHECKPOINT_PATH = None  # Especifique o caminho do checkpoint se disponível
     
