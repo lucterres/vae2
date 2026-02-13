@@ -235,6 +235,8 @@ class MabVAE(pl.LightningModule):
         (See Sutton et al,Reinforcement Learning: An Introduction)
         
         '''
+        # Enable manual optimization for multiple optimizers (PyTorch Lightning 2.x)
+        self.automatic_optimization = False
         
         self.eps=eps
         self.decoders=decoders
@@ -307,11 +309,8 @@ class MabVAE(pl.LightningModule):
     def forward(self, x):
         return self.encoder(x)
         
-    def backward(self, loss,optimizer,optimizer_idx):
-        loss.backward()
-        
     # calls before every train step tart
-    def on_train_batch_start(self,batch,batch_idx,dataloader_idx):
+    def on_train_batch_start(self, batch, batch_idx):
         
         #initialization of all the decoders
         #at the first epoch, they all have the same probability to be selected
@@ -334,80 +333,93 @@ class MabVAE(pl.LightningModule):
         
         
     # Training Loop
-    def training_step(self, batch, batch_idx, optimizer_idx):
-        if optimizer_idx==self.id_to_choose:
-            # batch returns x and y tensors
-            real_images, _ = batch
-            
-            #encoding
-            mu, log_var = self.encoder(real_images)
-            mu=mu.type_as(real_images[0])
-            log_var=log_var.type_as(real_images[0])
-            
-            #sampling of the latent variable
-            z = self.reparameterize(mu, log_var).type_as(real_images[0])
-            id_to_choose=self.id_to_choose
-            
-            #Computation of the best reward obtainable at time t with respect to all the possible decoders
-            #**********
-            with torch.no_grad():
-                best_reward=-10**(10)
-                
-                #Computation of the best reward achievable at time t
-                for decoder in self.decoders:
-                    recons=decoder(z).type_as(real_images[0])
-                    reward=-self.loss_function(recons,real_images,mu,log_var)['Reconstruction_Loss']
-                    if reward>best_reward:
-                        best_reward=reward
-    
-            self.best_rewards.append(best_reward)
-            #***********
-            
-            # Reconstruction with the selected decoder
-            recons = self.decoders[id_to_choose](z).type_as(real_images[0])
-            step_dict = self.loss_function(recons,real_images,mu,log_var)
-
-            self.history[id_to_choose]-=step_dict['Reconstruction_Loss']
-            self.strategy_path.append(-step_dict['Reconstruction_Loss'])
-            
-            # periodic save in order to monitor the evolution of the training for the decoders
-            if self.t % 100 == 0:
-                fake = self.decoders[id_to_choose](self.latent).detach()
-                plt.figure(figsize=(10, 10))
-                plt.imshow(np.transpose(utils.make_grid(fake, padding=2, normalize=True).cpu(), (1, 2, 0)))
-                plt.savefig(f'VAE_current_result_decoder={id_to_choose}.png')
-                plt.close('all')
-
-            
-            #We update the parameters of the chosen decoder 
-            
-            output = OrderedDict({
-                'loss': step_dict['total_loss'],
-                'progress_bar': step_dict,
-                'log': step_dict
-            })
-            self.t += 1
-            
-            return output
+    def training_step(self, batch, batch_idx):
+        # Get all optimizers
+        optimizers = self.optimizers()
         
-        if optimizer_idx==self.nb_decoders:
-            real_images, _ = batch
-            mu, log_var = self.encoder(real_images)
-            mu=mu.type_as(real_images[0])
-            log_var=log_var.type_as(real_images[0])
-            #sampling of the latent variable
-            z = self.reparameterize(mu, log_var).type_as(real_images[0])
-            # Reconstruction with the selected decoder
-            recons = self.decoders[self.id_to_choose](z).type_as(real_images[0])
-            step_dict = self.loss_function(recons,real_images,mu,log_var)
-            #We update the parameters of the encoder
-            output = OrderedDict({
-                'loss': step_dict['total_loss'],
-                'progress_bar': step_dict,
-                'log': step_dict
-            })
+        # batch returns x and y tensors
+        real_images, _ = batch
+        
+        # Get the selected decoder optimizer and encoder optimizer
+        id_to_choose = self.id_to_choose
+        decoder_opt = optimizers[id_to_choose]
+        encoder_opt = optimizers[self.nb_decoders]
+        
+        # Zero gradients for decoder
+        decoder_opt.zero_grad()
+        
+        #encoding
+        mu, log_var = self.encoder(real_images)
+        mu=mu.type_as(real_images[0])
+        log_var=log_var.type_as(real_images[0])
+        
+        #sampling of the latent variable
+        z = self.reparameterize(mu, log_var).type_as(real_images[0])
+        
+        #Computation of the best reward obtainable at time t with respect to all the possible decoders
+        #**********
+        with torch.no_grad():
+            best_reward=-10**(10)
             
-            return output
+            #Computation of the best reward achievable at time t
+            for decoder in self.decoders:
+                recons=decoder(z).type_as(real_images[0])
+                reward=-self.loss_function(recons,real_images,mu,log_var)['Reconstruction_Loss']
+                if reward>best_reward:
+                    best_reward=reward
+
+        self.best_rewards.append(best_reward)
+        #***********
+        
+        # Reconstruction with the selected decoder
+        recons = self.decoders[id_to_choose](z).type_as(real_images[0])
+        step_dict = self.loss_function(recons,real_images,mu,log_var)
+
+        self.history[id_to_choose]-=step_dict['Reconstruction_Loss']
+        self.strategy_path.append(-step_dict['Reconstruction_Loss'])
+        
+        # periodic save in order to monitor the evolution of the training for the decoders
+        if self.t % 100 == 0:
+            fake = self.decoders[id_to_choose](self.latent).detach()
+            plt.figure(figsize=(10, 10))
+            plt.imshow(np.transpose(utils.make_grid(fake, padding=2, normalize=True).cpu(), (1, 2, 0)))
+            plt.savefig(f'VAE_current_result_decoder={id_to_choose}.png')
+            plt.close('all')
+
+        
+        # Manual backward and optimizer step for selected decoder
+        self.manual_backward(step_dict['total_loss'], retain_graph=True)
+        decoder_opt.step()
+        
+        # Now update encoder with the same batch
+        encoder_opt.zero_grad()
+        
+        # Re-encode (gradients required this time for encoder)
+        mu, log_var = self.encoder(real_images)
+        mu=mu.type_as(real_images[0])
+        log_var=log_var.type_as(real_images[0])
+        
+        #sampling of the latent variable
+        z = self.reparameterize(mu, log_var).type_as(real_images[0])
+        
+        # Reconstruction with the selected decoder
+        recons = self.decoders[id_to_choose](z).type_as(real_images[0])
+        step_dict_encoder = self.loss_function(recons,real_images,mu,log_var)
+        
+        # Manual backward and optimizer step for encoder
+        self.manual_backward(step_dict_encoder['total_loss'])
+        encoder_opt.step()
+        
+        #We update the parameters of the chosen decoder 
+        
+        output = OrderedDict({
+            'loss': step_dict['total_loss'],
+            'progress_bar': step_dict,
+            'log': step_dict
+        })
+        self.t += 1
+            
+        return output
             
             
        
