@@ -268,9 +268,10 @@ class MabVAE(pl.LightningModule):
         return eps * std + mu
 
     def loss_function(self, recons, input, mu, log_var):
-        """
+        r"""
         Computes the VAE loss function.
-        KL(N(\mu, \sigma), N(0, 1)) = \log \frac{1}{\sigma} + \frac{\sigma^2 + \mu^2}{2} - \frac{1}{2}
+        KL(N(\mu, \sigma), N(0, 1)) = \log \frac{1}{\sigma} +
+        \frac{\sigma^2 + \mu^2}{2} - \frac{1}{2}
         Reconstruction_Loss = BCE
         """
         recon_loss = F.binary_cross_entropy(recons.view(-1, self.im_size, self.im_size), input.view(-1, self.im_size, self.im_size), reduction='sum')

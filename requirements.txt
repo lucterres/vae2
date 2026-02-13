@@ -1,0 +1,8 @@
+torch==2.10.0
+torchvision==0.25.0
+pytorch-lightning==2.6.1
+numpy==2.4.2
+pandas==3.0.0
+matplotlib==3.10.8
+opencv-python==4.13.0.92
+pillow==12.1.1
