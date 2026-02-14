@@ -202,7 +202,7 @@ def main():
     # Configurações
     NUM_SAMPLES = 100
     OUTPUT_DIR = './generated_masks'
-    CHECKPOINT_PATH = 'vae_checkpoint.pth'  # Especifique o caminho do checkpoint se disponível
+    CHECKPOINT_PATH = './vae_checkpoint.pth'  # Especifique o caminho do checkpoint se disponível
     
     # Cria diretório de saída
     output_dir = create_output_directory(OUTPUT_DIR)
