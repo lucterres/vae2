@@ -39,6 +39,82 @@ NUM_SAMPLES = 500  # Gerar 500 em vez de 100
 OUTPUT_DIR = './my_masks'  # Diretório customizado
 ```
 
+## Retreinar o Modelo
+
+### Pré-requisito: gerar o CSV de IDs
+
+```powershell
+# Lista nomes de arquivo sem extensão, preservando como texto (colunas: id, pass)
+$files = Get-ChildItem 'D:/dataset/tgs-salt/train/mask10k' |
+         ForEach-Object { '"' + $_.BaseName + '",True' }
+@('id,pass') + $files | Set-Content 'D:/dataset/tgs-salt/train/mask10k_files.csv'
+```
+
+---
+
+### Opção A — Script `train.py` ✓ Recomendado
+
+Mais estável no Windows: usa `num_workers > 0` e não causa crash de kernel.
+
+```powershell
+# Treino padrão: 20 épocas, batch=32, workers=2
+python train.py
+
+# Mais épocas
+python train.py --epochs 50
+
+# Batch maior (mais RAM, mais rápido)
+python train.py --batch 64
+
+# Mais workers no DataLoader
+python train.py --workers 4
+
+# Retomar treino interrompido
+python train.py --resume
+```
+
+**Argumentos disponíveis:**
+
+| Argumento | Padrão | Descrição |
+|-----------|--------|-----------|
+| `--epochs` | 20 | Número de épocas |
+| `--batch` | 32 | Tamanho do batch |
+| `--workers` | 2 | Workers do DataLoader |
+| `--resume` | False | Retoma do último checkpoint Lightning |
+
+**Saída:** `vae_checkpoint.pth` salvo automaticamente ao final.
+
+**Checkpoints por época** (para retomada com `--resume`):
+```
+lightning_logs/version_X/checkpoints/epoch=XX.ckpt
+```
+
+---
+
+### Opção B — Notebook `maskCustomDS.ipynb`
+
+> ⚠ No Windows, use `num_workers=0` no DataLoader para evitar crash de kernel.
+
+Edite os caminhos na célula de configuração:
+
+```python
+TRAIN_CSV      = 'D:/dataset/tgs-salt/train/mask10k_files.csv'
+TRAIN_MASK_DIR = 'D:/dataset/tgs-salt/train/mask10k'
+```
+
+Execute as células em sequência até a célula de salvamento do checkpoint.
+
+---
+
+### Estimativa de tempo (20 épocas, ~11.600 amostras)
+
+| Hardware | Tempo estimado |
+|----------|---------------|
+| CPU | ~30–100 min |
+| GPU NVIDIA (CUDA) | ~7–20 min |
+
+---
+
 ## Workflow Reproduzido
 
 1. ✓ CustomImageDataset
