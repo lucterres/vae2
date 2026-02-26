@@ -38,7 +38,7 @@ class CustomImageDataset(Dataset):
         filename = self.img_labels.iloc[idx, 0].strip('"') + '.png'
         img_path = os.path.join(self.img_dir, filename)
         image = Image.open(img_path)
-        label = self.img_labels.iloc[idx, 1]
+        label = self.img_labels.iloc[idx, 1] if self.img_labels.shape[1] > 1 else 0
         if self.transform:
             image = self.transform(image)
         return image, label
@@ -46,8 +46,8 @@ class CustomImageDataset(Dataset):
 
 # ── Configuração ───────────────────────────────────────────────────────────────
 
-TRAIN_CSV      = 'D:/dataset/tgs-salt/train/mask10k_files.csv'
-TRAIN_MASK_DIR = 'D:/dataset/tgs-salt/train/mask10k'
+TRAIN_CSV      = 'data/saltMaskOk.csv'
+TRAIN_MASK_DIR =  '/nethome/atena_projetos/cym7/dataset/tgsSalt/train/masks'
 CHECKPOINT_OUT = 'vae_checkpoint.pth'
 
 
@@ -108,7 +108,8 @@ def main(args):
             print("Nenhum checkpoint encontrado — iniciando do zero.")
 
     trainer = Trainer(
-        accelerator='cpu',
+        accelerator='gpu',
+        devices=1,
         max_epochs=args.epochs,
         log_every_n_steps=10,
         callbacks=callbacks,
@@ -141,7 +142,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Treina o MabVAE')
     parser.add_argument('--epochs',  type=int, default=20,  help='Número de épocas (padrão: 20)')
     parser.add_argument('--batch',   type=int, default=32,  help='Tamanho do batch (padrão: 32)')
-    parser.add_argument('--workers', type=int, default=0,   help='Workers do DataLoader (padrão: 0, seguro no Windows)')
+    parser.add_argument('--workers', type=int, default=4,   help='Workers do DataLoader (padrão: 0, seguro no Windows)')
     parser.add_argument('--resume',  action='store_true',   help='Retoma do último checkpoint Lightning')
     args = parser.parse_args()
     main(args)

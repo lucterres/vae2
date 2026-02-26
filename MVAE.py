@@ -388,7 +388,7 @@ class MabVAE(pl.LightningModule):
 
         
         # Manual backward and optimizer step for selected decoder
-        self.manual_backward(step_dict['total_loss'], retain_graph=True)
+        self.manual_backward(step_dict['total_loss'])
         decoder_opt.step()
         
         # Now update encoder with the same batch
