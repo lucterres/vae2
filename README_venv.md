@@ -84,7 +84,7 @@ py -3.12 -m venv "$env:LOCALAPPDATA\venvs\vae2" --without-pip
 ```powershell
 & "$env:LOCALAPPDATA\venvs\vae2\Scripts\python.exe" -m pip install `
     pytorch-lightning==2.6.1 pandas==3.0.0 matplotlib==3.10.8 `
-    opencv-python==4.13.0.92 pillow==12.1.1 `
+    opencv-python==4.13.0.92 pillow==12.1.1 scikit-image `
     --index-url https://nexus.petrobras.com.br/nexus/repository/pypi-all/simple `
     --trusted-host nexus.petrobras.com.br
 ```
@@ -117,6 +117,7 @@ print(torch.cuda.get_device_name(0))  # GRID T4-4Q
 | matplotlib | 3.10.8 | via Nexus |
 | opencv-python | 4.13.0.92 | via Nexus |
 | pillow | 12.0.0 | instalada como dependência do torch |
+| scikit-image | 0.26.0 | via Nexus (inclui scipy, imageio, tifffile, lazy-loader) |
 
 ---
 
@@ -128,4 +129,5 @@ print(torch.cuda.get_device_name(0))  # GRID T4-4Q
 | `Could not find torch==2.10.0+cu121` | Versão não existe para Py3.12 | Versão máxima cu121/Py3.12 é **2.5.1** |
 | `Could not find torch+cu121` (qualquer versão) | Python 3.13 não tem wheels cu121 | Usar **Python 3.12** |
 | `ensurepip` trava ao criar venv | Proxy corporativo interrompe subprocess | Usar `--without-pip` + bootstrapar depois |
+| Venv lento / travado | Drive de rede `F:` | Criar em `$env:LOCALAPPDATA\venvs\` (~15 min vs ~3h no DFS) |
 | Venv lento / travado | Drive de rede `F:` | Criar em `$env:LOCALAPPDATA\venvs\` |
