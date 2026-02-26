@@ -41,17 +41,24 @@ $files = Get-ChildItem 'D:/dataset/tgs-salt/train/mask10k' |
 ### 2. Treinar o modelo
 
 ```powershell
-# Treino padrão (20 épocas)
-python train.py
+# CPU básica (≤8GB RAM)
+python train.py --batch 16
 
-# Opções
-python train.py --epochs 50 --batch 64 --workers 4
+# CPU com +RAM (≥16GB)
+python train.py --batch 64 --workers 4
+
+# GPU NVIDIA
+python train.py --batch 128 --workers 4 --gpu
 
 # Retomar treino interrompido
 python train.py --resume
 ```
 
-Saída: `vae_checkpoint.pth`
+| Hardware | Tempo (~20 épocas) |
+|----------|--------------------|
+| CPU básica | ~60–120 min |
+| CPU ≥16GB RAM | ~30–60 min |
+| GPU NVIDIA | ~7–20 min |
 
 ### 3. Gerar máscaras
 
