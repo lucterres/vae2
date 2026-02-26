@@ -201,8 +201,8 @@ def main():
     
     # Configurações
     NUM_SAMPLES = 200
-    OUTPUT_DIR = './outputs/gt200_vae_masks'
-    CHECKPOINT_PATH = './vae_checkpoint.pth'  # Especifique o caminho do checkpoint se disponível
+    OUTPUT_DIR = './outputs/V100-vae200_masks'
+    CHECKPOINT_PATH = './vae_checkpointV100.pth'  # Especifique o caminho do checkpoint se disponível
     
     # Cria diretório de saída
     output_dir = create_output_directory(OUTPUT_DIR)

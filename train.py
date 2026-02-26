@@ -46,9 +46,10 @@ class CustomImageDataset(Dataset):
 
 # ── Configuração ───────────────────────────────────────────────────────────────
 
-TRAIN_CSV      = 'data/saltMaskOk.csv'
-TRAIN_MASK_DIR =  '/nethome/atena_projetos/cym7/dataset/tgsSalt/train/masks'
-CHECKPOINT_OUT = 'vae_checkpoint.pth'
+TRAIN_CSV      = 'data/mask10k_files.csv'        #saltMaskOk.csv'
+
+TRAIN_MASK_DIR =  '/nethome/atena_projetos/cym7/dataset/tgsSalt/train/mask10k/mask10k'
+CHECKPOINT_OUT = 'vae_checkpoint10k.pth'
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
