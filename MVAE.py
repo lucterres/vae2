@@ -388,7 +388,8 @@ class MabVAE(pl.LightningModule):
 
         
         # Manual backward and optimizer step for selected decoder
-        self.manual_backward(step_dict['total_loss'], retain_graph=True)
+        self.manual_backward(step_dict['total_loss'])
+        self.clip_gradients(decoder_opt, gradient_clip_val=1.0, gradient_clip_algorithm="norm")
         decoder_opt.step()
         
         # Now update encoder with the same batch
@@ -408,6 +409,7 @@ class MabVAE(pl.LightningModule):
         
         # Manual backward and optimizer step for encoder
         self.manual_backward(step_dict_encoder['total_loss'])
+        self.clip_gradients(encoder_opt, gradient_clip_val=1.0, gradient_clip_algorithm="norm")
         encoder_opt.step()
         
         #We update the parameters of the chosen decoder 

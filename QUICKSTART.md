@@ -106,12 +106,23 @@ Execute as células em sequência até a célula de salvamento do checkpoint.
 
 ---
 
-### Estimativa de tempo (20 épocas, ~11.600 amostras)
+### Recomendações por hardware (20 épocas, ~11.600 amostras)
 
-| Hardware | Tempo estimado |
-|----------|---------------|
-| CPU | ~30–100 min |
-| GPU NVIDIA (CUDA) | ~7–20 min |
+| Hardware | Comando | Tempo estimado |
+|----------|---------|---------------|
+| CPU básica (≤8GB RAM) | `python train.py --batch 16` | ~60–120 min |
+| CPU com +RAM (≥16GB) | `python train.py --batch 64 --workers 4` | ~30–60 min |
+| GPU NVIDIA (CUDA) | `python train.py --batch 128 --workers 4 --gpu` | ~7–20 min |
+| GPU NVIDIA + muita RAM | `python train.py --batch 256 --workers 8 --gpu` | ~4–10 min |
+
+> **`--workers`**: use número de núcleos físicos / 2 (ex: CPU 8 núcleos → `--workers 4`).  
+> **`--gpu`**: requer CUDA instalado. Ignore se não tiver GPU NVIDIA.  
+> **Windows com pouca RAM**: mantenha `--batch 16 --workers 0` para evitar crashes.
+
+Para verificar sua GPU:
+```powershell
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'sem GPU')"
+```
 
 ---
 
