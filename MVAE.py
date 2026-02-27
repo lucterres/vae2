@@ -247,14 +247,14 @@ class MabVAE(pl.LightningModule):
         self.in_channel=self.decoders[0].in_channel
         self.encoder = Encoder(latent_dim=self.latent_dim,in_channel=decoders[0].in_channel,im_size=self.im_size)
         #tensor storing information about the number of times a decoder is chosen and the reward associated
-        self.history=torch.zeros(self.nb_decoders).to(device)
-        self.NbDraws=torch.zeros(self.nb_decoders).to(device)
+        self.register_buffer('history', torch.zeros(self.nb_decoders))
+        self.register_buffer('NbDraws', torch.zeros(self.nb_decoders))
         #list for storing the reconstruction losses obtained through the time following our strategy
         self.strategy_path=[]
         self.train_loader = train_loader
         #list for storing the best rewards obtainable at each round 
         self.best_rewards=[]
-        self.latent = torch.randn(64, self.latent_dim, 1, 1).to(device)
+        self.register_buffer('latent', torch.randn(64, self.latent_dim, 1, 1))
         self.i=i #counter of epochs
         self.t=0 #counter of steps
 

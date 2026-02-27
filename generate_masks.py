@@ -201,8 +201,8 @@ def main():
     
     # Configurações
     NUM_SAMPLES = 200
-    OUTPUT_DIR = './outputs/10k-vae200_masks'
-    CHECKPOINT_PATH = './vae_checkpoint10k.pth'  # Especifique o caminho do checkpoint se disponível
+    OUTPUT_DIR = './outputs/10k-vae200_masks7'
+    CHECKPOINT_PATH = './vae_checkpointV100.pth'  # Especifique o caminho do checkpoint se disponível
     
     # Cria diretório de saída
     output_dir = create_output_directory(OUTPUT_DIR)
@@ -215,7 +215,7 @@ def main():
     generate_masks(decoder, num_samples=NUM_SAMPLES, output_dir=output_dir)
     
     # Cria visualização
-    create_visualization(output_dir, num_display=16)
+    # create_visualization(output_dir, num_display=16)
     
     print("\n" + "="*60)
     print("Processo concluído!")

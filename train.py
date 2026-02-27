@@ -46,10 +46,10 @@ class CustomImageDataset(Dataset):
 
 # ── Configuração ───────────────────────────────────────────────────────────────
 
-TRAIN_CSV      = 'data/mask10k_files.csv'        #saltMaskOk.csv'
+TRAIN_CSV      = 'data/saltMaskOk.csv'        #saltMaskOk.csv' mask10k_files.csv
 
 TRAIN_MASK_DIR =  '/nethome/atena_projetos/cym7/dataset/tgsSalt/train/mask10k/mask10k'
-CHECKPOINT_OUT = 'vae_checkpoint10k.pth'
+CHECKPOINT_OUT = 'vae_checkpoint10k_c.pth'
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -110,7 +110,8 @@ def main(args):
 
     trainer = Trainer(
         accelerator='gpu',
-        devices=1,
+        devices=args.devices,
+        strategy='ddp' if args.devices > 1 else 'auto',
         max_epochs=args.epochs,
         log_every_n_steps=10,
         callbacks=callbacks,
@@ -144,6 +145,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs',  type=int, default=20,  help='Número de épocas (padrão: 20)')
     parser.add_argument('--batch',   type=int, default=32,  help='Tamanho do batch (padrão: 32)')
     parser.add_argument('--workers', type=int, default=4,   help='Workers do DataLoader (padrão: 0, seguro no Windows)')
+    parser.add_argument('--devices', type=int, default=1,   help='Número de GPUs (padrão: 1)')
     parser.add_argument('--resume',  action='store_true',   help='Retoma do último checkpoint Lightning')
     args = parser.parse_args()
     main(args)

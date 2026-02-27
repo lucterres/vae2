@@ -25,7 +25,7 @@ Ambiente de treinamento do projeto **vae2** no cluster de IA **Atena** do CENPES
 | `/u/cym7` | `homeunix-rio.petrobras.biz` | 20 GB | Home do usuário |
 | `/nethome/atena_projetos` | `srjcipdvfs50502.petrobras.biz` | 7.9 TB | DFS de projetos |
 
-> **Repositório do projeto:** `/u/cym7/code/vae2`  
+> **Repositório do projeto:** `/nethome/atena_projetos/cym7/code/vae2`  
 > **Dataset TGS Salt:** `/nethome/atena_projetos/cym7/dataset/tgsSalt/`
 
 ---
@@ -63,7 +63,7 @@ Ambiente de treinamento do projeto **vae2** no cluster de IA **Atena** do CENPES
 | Item | Detalhe |
 |------|---------|
 | Python | **3.12** (via conda/módulo separado do sistema) |
-| venv | `/u/cym7/code/vae2/.venv` |
+| venv | `/nethome/atena_projetos/cym7/code/vae2/.venv` |
 | torch | `2.5.1+cu121` |
 | torchvision | `0.20.1+cu121` |
 | pytorch-lightning | `2.6.1` |
@@ -71,7 +71,7 @@ Ambiente de treinamento do projeto **vae2** no cluster de IA **Atena** do CENPES
 ### Criar o venv
 
 ```bash
-cd /u/cym7/code/vae2
+cd /nethome/atena_projetos/cym7/code/vae2
 bash setup_venv_linux.sh
 ```
 
@@ -80,7 +80,7 @@ O script cria `.venv/`, instala torch com CUDA 12.1 e verifica a GPU automaticam
 ### Ativar o venv
 
 ```bash
-source /u/cym7/code/vae2/.venv/bin/activate
+source /nethome/atena_projetos/cym7/code/vae2/.venv/bin/activate
 ```
 
 ---
@@ -88,7 +88,7 @@ source /u/cym7/code/vae2/.venv/bin/activate
 ## Treinamento
 
 ```bash
-cd /u/cym7/code/vae2
+cd /nethome/atena_projetos/cym7/code/vae2
 source .venv/bin/activate
 
 # Treino padrão (20 épocas, batch 32, 4 workers, GPU 0)
