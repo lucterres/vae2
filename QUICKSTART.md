@@ -2,7 +2,7 @@
 
 ## Teste Rápido (sem treinar)
 
-```powershell
+```powershell / bash
 # Gera 5 máscaras de teste para validar o script
 python test_generate.py
 ```
