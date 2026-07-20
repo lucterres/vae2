@@ -22,6 +22,6 @@ Decoders = nn.ModuleList([Decoder_MLP(latent_dim=100, in_channel=1, im_size=32, 
 MabVae = MabVAE(train_loader, Decoders, eps=0.3, i=0)
 
 #device = torch.device(1 if torch.cuda.is_available() else 0)
-trainer = Trainer(gpus=1, max_epochs=5)
+trainer = Trainer(accelerator="gpu", devices=1, max_epochs=5)
 
 trainer.fit(MabVae)
